@@ -1,8 +1,12 @@
 const electron = require('electron')
-const { app, BrowserWindow, ipcMain, screen } = electron
+const db = require('./config/database/db_config')
+const { app, BrowserWindow, ipcMain, screen, webContents } = electron
+const remote = require('@electron/remote/main')
+remote.initialize()
 
 let mainWindow;
 let productWindow;
+let editDataModal;
 
 mainWin = () => {
   mainWindow = new BrowserWindow({
@@ -17,6 +21,9 @@ mainWin = () => {
   })
 
   mainWindow.loadFile('index.html')
+  db.serialize(() => {
+    console.log('DB Connected')
+  })
 }
 
 app.on('ready', () => {
@@ -41,6 +48,8 @@ productWin = () => {
     title: 'My Chasier | Data Produk'
   })
 
+  remote.enable(productWindow.webContents)
+
   productWindow.loadFile('windows/product.html')
   productWindow.webContents.on('did-finish-load', () => {
     mainWindow.hide()
@@ -50,3 +59,47 @@ productWin = () => {
     mainWindow.show()
   })
 }
+
+editData = (docId, modalForm, modalWidth, modalHeight, rowId) => {
+  let parentWin
+  switch (docId) {
+    case 'product-data':
+      parentWin = productWindow
+      break;
+  }
+  editDataModal = new BrowserWindow({
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    },
+    width: modalWidth,
+    height: modalHeight,
+    resizable: false,
+    maximizable: false,
+    minimizable: false,
+    parent: parentWin,
+    modal: true,
+    title: 'Edit Data',
+    autoHideMenuBar: true
+  })
+  remote.enable(editDataModal.webContents)
+  editDataModal.loadFile('modals/edit-data.html')
+  editDataModal.webContents.on('did-finish-load', () => {
+    editDataModal.webContents.send('res:form', docId, modalForm, rowId)
+  })
+  editDataModal.on('close', () => {
+    editDataModal = null
+  })
+}
+
+ipcMain.on('load:edit', (event, msgDocId, msgForm, msgWidth, msgHeight, msgRowId) => {
+  editData(msgDocId, msgForm, msgWidth, msgHeight, msgRowId)
+})
+
+ipcMain.on('update:success', (e, msgDocId) => {
+  switch (msgDocId) {
+    case 'product-data':
+      productWindow.webContents.send('update:success', 'Successfully updates product data')
+  }
+  editDataModal.close()
+})

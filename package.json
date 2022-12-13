@@ -11,5 +11,10 @@
   "license": "ISC",
   "devDependencies": {
     "electron": "^22.0.0"
+  },
+  "dependencies": {
+    "@electron/remote": "^2.0.8",
+    "imask": "^6.4.3",
+    "sqlite3": "^5.1.2"
   }
 }
