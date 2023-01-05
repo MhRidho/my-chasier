@@ -49,8 +49,44 @@ let inputPrdInitQty = IMask(
   }
 )
 
-function loadProduct() {
-  let query = `select * from products`
+totalPrdPage = (total_row_displayed, searchVal) => {
+  let query
+  if (searchVal != "") {
+    query = `select count(*) as total_row from products where product_name like '%${searchVal}%' escape '!' or product_code like '%${searchVal}%' escape '!' or barcode like '%${searchVal}%' escape '!' or category like '%${searchVal}%' escape '!' or selling_price like '%${searchVal}%' escape '!' or cost_of_product like '%${searchVal}%' escape '!'`
+  } else {
+    query = `select count(*) as total_row from products`
+  }
+
+  db.serialize(() => {
+    db.each(query, (err, result) => {
+      if (err) throw err
+      let total_page
+      if (result.total_row % total_row_displayed == 0) {
+        total_page = parseInt(result.total_row) / parseInt(total_row_displayed)
+      } else {
+        total_page = parseInt(result.total_row / total_row_displayed) + 1
+      }
+      $('#total_pages').val(total_page)
+    })
+  })
+}
+
+function loadProduct(page_number, total_row_displayed, searchVal) {
+  let row_number
+  if (page_number < 2) {
+    row_number = 0
+  } else {
+    row_number = (page_number - 1) * total_row_displayed
+  }
+  total_page(total_row_displayed, searchVal)
+
+  let query
+  if (searchVal != "") {
+    query = `select * from products where product_name like '%${searchVal}%' escape '!' or product_code like '%${searchVal}%' escape '!' or barcode like '%${searchVal}%' escape '!' or category like '%${searchVal}%' escape '!' or selling_price like '%${searchVal}%' escape '!' or cost_of_product like '%${searchVal}%' escape '!' order by id desc limit ${row_number}, ${total_row_displayed}`
+  } else {
+    query = `select * from products order by id desc limit ${row_number}, ${total_row_displayed}`
+  }
+
   db.serialize(() => {
     db.all(query, (err, rows) => {
       if (err) throw err
@@ -271,3 +307,24 @@ ipcRenderer.on('update:success', (e, msg) => {
   alertSuccess(msg)
   load_data()
 })
+
+exportCsvPrdData = (filePath, ext, joinIds = false) => {
+  let sql
+  let file_path = filePath.replace(/\\/g, '/')
+  if (joinIds) {
+    sql = `select * from products where id IN(${joinIds}) order by id desc`
+  } else {
+    sql = `select * from products order by id desc`
+  }
+  db.all(slq, (err, result) => {
+    if (err) throw err
+    converToCsv = (arr) => {
+      let array = [Obect.keys(arr[0])].concat(arr)
+      return array.map((item) => {
+        return Obect.values(item).toString()
+      }).join('\r\n')
+    }
+    let content = converToCsv(result)
+    ipcRenderer.send('write:csv', file_path, content)
+  })
+}

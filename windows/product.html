@@ -13,7 +13,7 @@
 <body id="product-data">
   <nav class="navbar navbar-dark bg-dark fixed-top">
     <div style="display: inline-block; color: aliceblue;">
-      <span id="store-name" class="ms-2" style="font-size: 14.5px">My Store</span>
+      <span id="store-name" class="ms-2" style="font-size: 14.5px">Application Store</span>
     </div>
     <div style="display: inline-block;">
       <div class="dropdown me-2" style="display: inline;">
@@ -57,9 +57,12 @@
                   onclick="openFormAddData()"><i class="fa fa-plus"></i></button>
                 <button class="btn btn-sm btn-light btn-light-bordered" onclick="deleteAction()"
                   id="delete-multiple-data" data-bs-toggle="tooltip" title="Hapus"><i class="fa fa-trash"></i></button>
-                <button class="btn btn-sm btn-light btn-light-bordered"><i class="fa fa-file-excel"></i></button>
-                <button class="btn btn-sm btn-light btn-light-bordered"><i class="fa fa-file-pdf"></i></button>
-                <button class="btn btn-sm btn-light btn-light-bordered"><i class="fa fa-print"></i></button>
+                <button class="btn btn-sm btn-light btn-light-bordered" title="Export CSV"
+                  onclick="exportData('csv')"><i class="fa fa-file-excel"></i></button>
+                <button class="btn btn-sm btn-light btn-light-bordered" title="Export PDF"
+                  onclick="exportData('pdf')"><i class="fa fa-file-pdf"></i></button>
+                <button class="btn btn-sm btn-light btn-light-bordered" title="Print Table"><i
+                    class="fa fa-print"></i></button>
                 <button class="btn btn-sm btn-light btn-light-bordered" onclick="selectAll()" id="select-all"
                   title="Select All"><i class="fa fa-check"></i></button>
                 <button class="btn btn-sm btn-light btn-light-bordered" onclick="unSelectAll()" id="unselect-all"
@@ -67,7 +70,7 @@
               </div>
               <div class="col-auto">
                 <select name="" id="row_per_page" class="form-select form-select-sm">
-                  <option value="10">10</option>
+                  <option value="2">2</option>
                   <option value="25">25</option>
                   <option value="50">50</option>
                   <option value="75">75</option>
@@ -93,7 +96,7 @@
                   </div>
                   <div class="input-group input-group-sm mx-1">
                     <input type="text" class="form-control form-control-sm" id="page_number" value="1">
-                    <input type="text" class="form-control form-control-sm" id="total_pages" readonly>
+                    <input type="text" class="form-control form-control-sm" id="total_pages" disabled>
                   </div>
                   <div class="btn-group btn-group-sm">
                     <a href="#" class="btn btn-sm btn-light-bordered" id="next-page"><i class="fa fa-forward"></i></a>

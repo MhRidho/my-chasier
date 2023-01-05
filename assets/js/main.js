@@ -1,13 +1,26 @@
 let doc_id = $('body').attr('id')
-load_data = () => {
+
+// total page
+total_page = (total_row_displayed, searchVal = "") => {
   switch (doc_id) {
     case 'product-data':
-      loadProduct();
+      totalPrdPage(total_row_displayed, searchVal);
       break;
   }
 }
 
-load_data()
+load_data = (page_number, total_row_displayed, searchVal = "") => {
+  switch (doc_id) {
+    case 'product-data':
+      loadProduct(page_number, total_row_displayed, searchVal);
+      break;
+  }
+}
+
+let page_number = $('#page_number').val()
+let total_row_displayed = $('#row_per_page').val()
+let searchVal = $('#search-data').val()
+load_data(page_number, total_row_displayed, searchVal)
 
 deleteRecord = (id) => {
   let doc_id = $('body').attr('id')

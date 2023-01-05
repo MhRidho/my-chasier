@@ -1,7 +1,11 @@
 const electron = require('electron')
 const db = require('./config/database/db_config')
-const { app, BrowserWindow, ipcMain, screen, webContents } = electron
+const { app, BrowserWindow, ipcMain, screen, webContents, dialog } = electron
 const remote = require('@electron/remote/main')
+const fs = require('fs')
+const path = require('path')
+const url = require('url')
+const md5 = require('md5')
 remote.initialize()
 
 let mainWindow;
@@ -102,4 +106,19 @@ ipcMain.on('update:success', (e, msgDocId) => {
       productWindow.webContents.send('update:success', 'Successfully updates product data')
   }
   editDataModal.close()
+})
+
+writeCsv = (path, content) => {
+  fs.write(path, content, err => {
+    if (err) throw err
+    dialog.showMessageBoxSync({
+      title: 'Alert',
+      type: 'Info',
+      message: 'csv file created'
+    })
+  })
+}
+
+ipcMain.on('write:csv', (e, msgPath, msgContent) => {
+  writeCsv(msgPath, msgContent)
 })
